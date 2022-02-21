@@ -58,11 +58,12 @@ const mutate = (
   mutationImpact: number,
   validGenomeRanges: [number, number][],
 ): Genome => {
-  return genome.map((x, i) =>
-    Math.random() <= mutationRate
-      ? getMutation(x, validGenomeRanges[i], mutationImpact)
+  const doMutate = Math.random() <= mutationRate
+  const mutated = genome.map((x, i) =>
+      doMutate ? getMutation(x, validGenomeRanges[i], mutationImpact)
       : x
   ) as Genome;
+  return mutated
 };
 const selectBest = (
   genomes: Genome[],
@@ -98,21 +99,27 @@ const getChildren = (
   mutationRate: number,
   mutationImpact: number,
   validGenomeRanges: [number, number][],
+  count = 0
 ): Genome[] => {
-  const children = new Array<Genome>();
-  for (let i = genomes.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    children.push(
-      mate(
-        genomes[i],
-        genomes[j],
-        mutationRate,
-        mutationImpact,
-        validGenomeRanges,
-      ),
-    );
+  if (count === 0){
+    count = genomes.length
   }
-  return children;
+  const children = new Array<Genome>();
+  while(children.length < count){
+    for (let i = genomes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      children.push(
+        mate(
+          genomes[i],
+          genomes[j],
+          mutationRate,
+          mutationImpact,
+          validGenomeRanges,
+        ),
+      );
+    }
+  }
+  return children.slice(0, count);
 };
 const getFitnesses = (
   threads: Worker[],
@@ -125,9 +132,6 @@ const getFitnesses = (
     for (let i = 0; i < threads.length; i++) {
       const thread = threads[i];
       const genome1 = population[sent];
-      if (genome1 === undefined) {
-        debugger;
-      }
       thread.postMessage([genome1, sent]);
       sent += 1;
       thread.onmessage = (e) => {
@@ -138,9 +142,6 @@ const getFitnesses = (
         completed += 1;
         if (sent < population.length) {
           const genome2 = population[sent];
-          if (genome2 === undefined) {
-            debugger;
-          }
           thread.postMessage([genome2, sent]);
           sent += 1;
         } else if (completed === population.length) {

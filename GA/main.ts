@@ -46,6 +46,7 @@ const evolve = async (
       mutationRate,
       mutationImpact,
       validGenomeRanges,
+      populationSize - survivors.length
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),

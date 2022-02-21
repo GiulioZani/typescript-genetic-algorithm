@@ -1,7 +1,7 @@
 {
-  "mutationRate": 0.01,
-  "mutationImpact": 0.01,
-  "survivalThreshold": 0.30,
+  "mutationRate": 0.02,
+  "mutationImpact": 0.1,
+  "survivalThreshold": 0.10,
   "generationCount": 100,
   "populationSize": 30,
   "threadCount": 16,
