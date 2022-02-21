@@ -1,12 +1,13 @@
 {
   "mutationRate": 0.01,
-  "mutationImpact": 0.3,
-  "survivalThreshold": 0.035,
+  "mutationImpact": 0.01,
+  "survivalThreshold": 0.30,
   "generationCount": 100,
   "populationSize": 30,
   "threadCount": 16,
-  "validGenomeRanges": [[-10, 10], [-10, 10]],
+  "validGenomeRanges": [[-1, 1], [-1, 1]],
   "objectiveFunctionName": "rosenbrock",
   "objectiveFunctionLocation": "../obj_functions",
-  "savePath":"../plot/data/"
+  "savePath": "../plot/data/",
+  "repeat": 10
 }

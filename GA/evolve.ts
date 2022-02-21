@@ -25,6 +25,7 @@ const getArgMin = (values: number[]) => {
 };
 
 const random = (a: number, b: number): number => Math.random() * (b - a) + a;
+
 const randomGenomes = (
   count: number,
   validGenomeRanges: [number, number][],
@@ -33,6 +34,7 @@ const randomGenomes = (
     .fill(0)
     .map(() => validGenomeRanges.map((x) => random(x[0], x[1])) as Genome);
 };
+
 const clip = (val: number, min: number, max: number) =>
   Math.min(max, Math.max(min, val));
 

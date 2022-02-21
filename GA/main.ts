@@ -9,18 +9,17 @@ import {
 } from "./evolve.ts";
 import config from "./config.json" assert { type: "json" };
 
-const main = async () => {
-  const {
-    mutationRate,
-    mutationImpact,
-    survivalThreshold,
-    generationCount,
-    populationSize,
-    threadCount,
-    objectiveFunctionLocation,
-    objectiveFunctionName,
-    savePath,
-  } = config;
+const evolve = async (
+  mutationRate: number,
+  mutationImpact: number,
+  survivalThreshold: number,
+  generationCount: number,
+  populationSize: number,
+  threadCount: number,
+  objectiveFunctionLocation: string,
+  objectiveFunctionName: string,
+  savePath: string,
+) => {
   const validGenomeRanges = config.validGenomeRanges as [number, number][];
   let population = randomGenomes(populationSize, validGenomeRanges);
   let fitnesses: number[] = [];
@@ -30,10 +29,12 @@ const main = async () => {
         type: "module",
       }),
   );
+  const objectiveFunctionFileName = path.join(
+    objectiveFunctionLocation,
+    `${objectiveFunctionName}.ts`,
+  );
   for (const thread of threads) {
-    thread.postMessage(
-      path.join(objectiveFunctionLocation, `${objectiveFunctionName}.ts`),
-    );
+    thread.postMessage(objectiveFunctionFileName);
   }
   const history: [number[], Genome[]][] = [];
   for (let generation = 0; generation < generationCount; generation++) {
@@ -59,11 +60,18 @@ const main = async () => {
       }\nBest genome:\n${population[argMin]}\n`,
     );
     history.push([fitnesses, population]);
-    await Deno.writeTextFile(`history.json`, JSON.stringify(history, null, 2));
     population = [...survivors, ...children, ...novelIndividuals];
   }
+  /*
   await Deno.writeTextFile(
-    path.join(savePath,`${objectiveFunctionName}_ga.json`),
+    `histories/${objectiveFunctionName}_${
+      String(performance.now()).replace(".", "")
+    }.json`,
+    JSON.stringify(history, null, 2),
+  );
+  */
+  await Deno.writeTextFile(
+    path.join(savePath, `${objectiveFunctionName}_ga.json`),
     JSON.stringify(
       history.map((xs) =>
         xs[1].map((x) => {
@@ -73,6 +81,41 @@ const main = async () => {
       null,
       2,
     ),
+  );
+  return history;
+};
+const main = async () => {
+  const {
+    mutationRate,
+    mutationImpact,
+    survivalThreshold,
+    generationCount,
+    populationSize,
+    threadCount,
+    objectiveFunctionLocation,
+    objectiveFunctionName,
+    savePath,
+    repeat,
+  } = config;
+  const histories = [];
+  for (let i = 0; i < repeat; i++) {
+    histories.push(
+      await evolve(
+        mutationRate,
+        mutationImpact,
+        survivalThreshold,
+        generationCount,
+        populationSize,
+        threadCount,
+        objectiveFunctionLocation,
+        objectiveFunctionName,
+        savePath,
+      ),
+    );
+  }
+  await Deno.writeTextFile(
+    `histories/${objectiveFunctionName}.json`,
+    JSON.stringify(histories, null, 2),
   );
   Deno.exit();
 };
