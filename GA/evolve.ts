@@ -87,7 +87,7 @@ const mate = (
   validGenomeRanges: [number, number][],
 ): Genome => {
   return mutate(
-    g1.map((_, i) => (Math.random() > 0.5 ? g1[i] : g2[i])) as Genome,
+    g1.map((_, i) => (g1[i] + g2[i])/2) as Genome,
     mutationRate,
     mutationImpact,
     validGenomeRanges,
