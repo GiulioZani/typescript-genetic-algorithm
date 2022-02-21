@@ -86,7 +86,7 @@ const getPlotter = async (
     const content = await (await fetch(fileName)).json() as unknown as Data;
     allData.push(content);
   }
-  const margin = 0.35
+  const margin = 0.00
   const maxPositionX = Math.max(...allData.map(data=>getMaxPositionX(data))) + margin;
   const maxPositionY = Math.max(...allData.map(data=>getMaxPositionY(data))) + margin;
   const minPositionX = Math.min(...allData.map(data=>getMinPositionX(data))) - margin;
@@ -106,7 +106,7 @@ const getPlotter = async (
       if (yData.length < pixDensity){
         yData.push(y)
       }
-      row.push(objectiveFunction([x, y]));
+      row.push(objectiveFunction([x-0.39, y+0.39]));
     }
     zData.push(row);
   }
@@ -117,11 +117,25 @@ const getPlotter = async (
     opacity:0.9,
     type: type === "contour" ? "contour" : "surface",
   };
-  
-  const traces = [functionTrace]
+ const dotTrace = {
+      x: [0],
+      y: [0],
+      type: type === "contour" ? "scatter2d" : "scatter3d",
+      mode: "markers",
+      marker: {
+        size: type === "contour" ? 10 : 2.5,
+        color: 'red',
+        line: {
+          width: 0.5,
+        },
+        opacity: 0.8,
+      },
+  }; 
+  const traces = [functionTrace, dotTrace]
   for (let i = 0; i<allData.length; i++){
     traces.push(dataToTrace(allData[i][0], type, objectiveFunction, fileNamesWithColors[i][1]));
   }
+
   const plot = document.getElementById(divName);
   await Plotly.newPlot(plot, traces, {
     width: window.innerWidth / 2.1,
@@ -146,7 +160,7 @@ const getPlotter = async (
     "update": async () => {
       if (i < dataSize) {
         for (let j=0;j<allData.length; j++){
-          const trace = traces[j+1]
+          const trace = traces[j+2]
           const data = allData[j]
           trace.x = getValues(0, data[i]);
           trace.y = getValues(1, data[i]);
