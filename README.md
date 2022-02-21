@@ -6,5 +6,5 @@ For additional info email: giulio(at)zani.gmail.com
 Run by installing [deno](https://deno.land/) and then:
 
 ```
-deno run --allow-write --allow-write main.ts
+deno run --allow-read --allow-write main.ts
 ```
