@@ -1,6 +1,9 @@
 import { Genome } from "./evolve.ts";
 
-let getFitness: ((a: Genome) => number) | null = null;
+let getFitness:
+  | ((a: Genome) => number)
+  | ((a: Genome) => Promise<number>)
+  | null = null;
 addEventListener("message", async (event) => {
   const parsedEvent = (event as unknown as Record<string, unknown>)["data"];
   if (typeof parsedEvent === "string") {
@@ -12,7 +15,8 @@ addEventListener("message", async (event) => {
   } else {
     if (getFitness !== null) {
       const [genome, index] = parsedEvent as [Genome, number];
-      const fitness = getFitness(genome);
+      const fitness = await getFitness(genome);
+      console.log(genome);
       postMessage([fitness, index]);
     } else {
       throw "Must initialize objective function first!";

@@ -5,21 +5,21 @@ const drawPlot = async () => {
     await fetch(`${objectiveFuntionName}_gd.json`)
   ).json();
   const minPositionX = Math.min(
-    ...rawData.flatMap((x) => x.map((y) => y.position[0])),
+    ...rawData.flatMap((x) => x.map((y) => y.position[0]))
   );
   const minPositionY = Math.min(
-    ...rawData.flatMap((x) => x.map((y) => y.position[1])),
+    ...rawData.flatMap((x) => x.map((y) => y.position[1]))
   );
   const maxPositionX = Math.max(
-    ...rawData.flatMap((x) => x.map((y) => y.position[0])),
+    ...rawData.flatMap((x) => x.map((y) => y.position[0]))
   );
   const maxPositionY = Math.max(
-    ...rawData.flatMap((x) => x.map((y) => y.position[1])),
+    ...rawData.flatMap((x) => x.map((y) => y.position[1]))
   );
   const rastrigin = (x) =>
     x.reduce(
       (acc, val) => acc + Math.pow(val, 2) - 10 * Math.cos(2 * Math.PI * val),
-      0,
+      0
     ) + 20;
   const rosenbrock = (x) => {
     const a = 0;
@@ -126,9 +126,10 @@ const drawPlot = async () => {
     height: window.innerHeight,
     scene: {
       camera: {
-        eye: objectiveFuntionName === "rastrigin"
-          ? { x: 0.8, y: -0.8, z: 1.5 }
-          : {},
+        eye:
+          objectiveFuntionName === "rastrigin"
+            ? { x: 0.8, y: -0.8, z: 1.5 }
+            : {},
       },
     },
     margin: {
@@ -142,15 +143,15 @@ const drawPlot = async () => {
   iterationCounter.innerHTML = 0;
   const surfacePlot = document.getElementById("plot1");
   const contourPlot = document.getElementById("plot2");
-  await Plotly.newPlot(contourPlot, [
-    contourTrace,
-    contourParticleTrace,
-    contourParticleTraceGD,
-  ], {
-    title: objectiveFuntionName,
-    width: window.innerWidth / 2.1,
-    height: window.innerHeight,
-  });
+  await Plotly.newPlot(
+    contourPlot,
+    [contourTrace, contourParticleTrace, contourParticleTraceGD],
+    {
+      title: objectiveFuntionName,
+      width: window.innerWidth / 2.1,
+      height: window.innerHeight,
+    }
+  );
   await Plotly.newPlot(surfacePlot, data, layout);
   let i = 1;
   const updatePlot = async () => {
@@ -183,10 +184,10 @@ const drawPlot = async () => {
       contourParticleTraceGD.x = [pixDensity * normalizeY(rawDataGD[i][1])];
       contourParticleTraceGD.y = [pixDensity * normalizeX(rawDataGD[i][0])];
       contourParticleTrace.x = rawData[i].map(
-        (p) => pixDensity * normalizeY(p.position[1]),
+        (p) => pixDensity * normalizeY(p.position[1])
       );
       contourParticleTrace.y = rawData[i].map(
-        (p) => pixDensity * normalizeX(p.position[0]),
+        (p) => pixDensity * normalizeX(p.position[0])
       );
       Plotly.redraw("plot2");
       /*

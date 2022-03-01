@@ -28,7 +28,7 @@ const random = (a: number, b: number): number => Math.random() * (b - a) + a;
 
 const randomGenomes = (
   count: number,
-  validGenomeRanges: [number, number][],
+  validGenomeRanges: [number, number][]
 ): Genome[] => {
   return Array(count)
     .fill(0)
@@ -41,7 +41,7 @@ const clip = (val: number, min: number, max: number) =>
 const getMutation = (
   value: number,
   range: [number, number],
-  mutationImpact: number,
+  mutationImpact: number
 ) =>
   clip(
     value +
@@ -50,30 +50,29 @@ const getMutation = (
         (range[1] - range[0]) *
         (Math.random() > 0.5 ? -1 : 1),
     range[0],
-    range[1],
+    range[1]
   );
 const mutate = (
   genome: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][],
+  validGenomeRanges: [number, number][]
 ): Genome => {
-  const doMutate = Math.random() <= mutationRate
+  const doMutate = Math.random() <= mutationRate;
   const mutated = genome.map((x, i) =>
-      doMutate ? getMutation(x, validGenomeRanges[i], mutationImpact)
-      : x
+    doMutate ? getMutation(x, validGenomeRanges[i], mutationImpact) : x
   ) as Genome;
-  return mutated
+  return mutated;
 };
 const selectBest = (
   genomes: Genome[],
   fitnesses: number[],
-  survivalThreshold = 0.3,
+  survivalThreshold = 0.3
 ): Genome[] => {
   //const sortedGenomes = argSort(genomes, fitnesses);
-  const sortedGenomesWithFitnesses = genomes.map((g, i) =>
-    [g, fitnesses[i]] as [Genome, number]
-  ).sort((a, b) => a[1] - b[1]);
+  const sortedGenomesWithFitnesses = genomes
+    .map((g, i) => [g, fitnesses[i]] as [Genome, number])
+    .sort((a, b) => a[1] - b[1]);
   const sortedGenomes = sortedGenomesWithFitnesses.map((x) => x[0]);
   const topIndex = Math.round(survivalThreshold * genomes.length);
   const result = sortedGenomes.slice(0, topIndex);
@@ -85,13 +84,13 @@ const mate = (
   g2: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][],
+  validGenomeRanges: [number, number][]
 ): Genome => {
   return mutate(
-    g1.map((_, i) => (g1[i] + g2[i])/2) as Genome,
+    g1.map((_, i) => (g1[i] + g2[i]) / 2) as Genome,
     mutationRate,
     mutationImpact,
-    validGenomeRanges,
+    validGenomeRanges
   );
 };
 const getChildren = (
@@ -101,11 +100,11 @@ const getChildren = (
   validGenomeRanges: [number, number][],
   count = 0
 ): Genome[] => {
-  if (count === 0){
-    count = genomes.length
+  if (count === 0) {
+    count = genomes.length;
   }
   const children = new Array<Genome>();
-  while(children.length < count){
+  while (children.length < count) {
     for (let i = genomes.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       children.push(
@@ -114,8 +113,8 @@ const getChildren = (
           genomes[j],
           mutationRate,
           mutationImpact,
-          validGenomeRanges,
-        ),
+          validGenomeRanges
+        )
       );
     }
   }
@@ -123,7 +122,7 @@ const getChildren = (
 };
 const getFitnesses = (
   threads: Worker[],
-  population: Genome[],
+  population: Genome[]
 ): Promise<number[]> =>
   new Promise<number[]>((resolve, _reject) => {
     const fitnesses = new Array<number>();

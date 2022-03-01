@@ -18,7 +18,7 @@ const evolve = async (
   threadCount: number,
   objectiveFunctionLocation: string,
   objectiveFunctionName: string,
-  savePath: string,
+  savePath: string
 ) => {
   const validGenomeRanges = config.validGenomeRanges as [number, number][];
   let population = randomGenomes(populationSize, validGenomeRanges);
@@ -27,11 +27,12 @@ const evolve = async (
     () =>
       new Worker(new URL("./get_fitness.ts", import.meta.url).href, {
         type: "module",
-      }),
+        deno: { namespace: true },
+      } as unknown as WorkerOptions)
   );
   const objectiveFunctionFileName = path.join(
     objectiveFunctionLocation,
-    `${objectiveFunctionName}.ts`,
+    `${objectiveFunctionName}.ts`
   );
   for (const thread of threads) {
     thread.postMessage(objectiveFunctionFileName);
@@ -41,8 +42,9 @@ const evolve = async (
     fitnesses = await getFitnesses(threads, population);
 
     const survivors = selectBest(population, fitnesses, survivalThreshold);
+    const parents = survivors.length > 0 ? survivors : population;
     const children = getChildren(
-      survivors,
+      parents,
       mutationRate,
       mutationImpact,
       validGenomeRanges,
@@ -50,15 +52,13 @@ const evolve = async (
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),
-      validGenomeRanges,
+      validGenomeRanges
     );
     const argMin = getArgMin(fitnesses);
-    // console.log(fitnesses.map((x) => x).sort((x, y) => y - x));
-    //console.log(fitnesses.slice().sort())
     console.log(
       `End of generation ${generation + 1}\nBest fitness:${
         fitnesses[argMin]
-      }\nBest genome:\n${population[argMin]}\n`,
+      }\nBest genome:\n${population[argMin]}\n`
     );
     history.push([fitnesses, population]);
     population = [...survivors, ...children, ...novelIndividuals];
@@ -80,8 +80,8 @@ const evolve = async (
         })
       ),
       null,
-      2,
-    ),
+      2
+    )
   );
   return history;
 };
@@ -110,13 +110,13 @@ const main = async () => {
         threadCount,
         objectiveFunctionLocation,
         objectiveFunctionName,
-        savePath,
-      ),
+        savePath
+      )
     );
   }
   await Deno.writeTextFile(
     `histories/${objectiveFunctionName}.json`,
-    JSON.stringify(histories, null, 2),
+    JSON.stringify(histories, null, 2)
   );
   Deno.exit();
 };
