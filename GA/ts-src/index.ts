@@ -1,4 +1,6 @@
-import * as path from "https://deno.land/std/path/mod.ts";
+import * as path from 'path';
+import * as fs from 'fs';
+
 import {
   Genome,
   getArgMin,
@@ -6,8 +8,7 @@ import {
   getFitnesses,
   randomGenomes,
   selectBest,
-} from "./evolve.ts";
-import config from "./config.json" assert { type: "json" };
+} from "./evolve";
 
 const evolve = async (
   mutationRate: number,
@@ -18,9 +19,9 @@ const evolve = async (
   threadCount: number,
   objectiveFunctionLocation: string,
   objectiveFunctionName: string,
+  validGenomeRanges: [number, number][],
   savePath: string,
 ) => {
-  const validGenomeRanges = config.validGenomeRanges as [number, number][];
   let population = randomGenomes(populationSize, validGenomeRanges);
   let fitnesses: number[] = [];
   const threads = new Array(threadCount).fill(0).map(
@@ -71,6 +72,7 @@ const evolve = async (
     JSON.stringify(history, null, 2),
   );
   */
+  /*
   await Deno.writeTextFile(
     path.join(savePath, `${objectiveFunctionName}_ga.json`),
     JSON.stringify(
@@ -83,9 +85,11 @@ const evolve = async (
       2,
     ),
   );
+  */
   return history;
 };
 const main = async () => {
+  const config = JSON.parse(fs.readFileSync("./config.json") as unknown as string)
   const {
     mutationRate,
     mutationImpact,
@@ -98,6 +102,7 @@ const main = async () => {
     savePath,
     repeat,
   } = config;
+  const validGenomeRanges = config.validGenomeRanges as [number, number][];
   const histories = [];
   for (let i = 0; i < repeat; i++) {
     histories.push(
@@ -110,15 +115,16 @@ const main = async () => {
         threadCount,
         objectiveFunctionLocation,
         objectiveFunctionName,
+        validGenomeRanges,
         savePath,
       ),
     );
   }
-  await Deno.writeTextFile(
-    `histories/${objectiveFunctionName}.json`,
-    JSON.stringify(histories, null, 2),
-  );
-  Deno.exit();
+  //await Deno.writeTextFile(
+  //  `histories/${objectiveFunctionName}.json`,
+  //  JSON.stringify(histories, null, 2),
+  //);
+  //Deno.exit();
 };
 
 await main();

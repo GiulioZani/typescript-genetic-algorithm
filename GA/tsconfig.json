@@ -1,0 +1,10 @@
+{
+	"compilerOptions":{
+		"module":"ESNext",
+		"target":"ESNext",
+		"outDir":"src",
+		"rootDir":"ts-src",
+		"alwaysStrict":true,
+		"strict":true
+	}
+}

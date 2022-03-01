@@ -1,4 +1,4 @@
-import { Genome } from "./evolve.ts";
+import { Genome } from "./evolve";
 
 let getFitness: ((a: Genome) => number) | null = null;
 addEventListener("message", async (event) => {
