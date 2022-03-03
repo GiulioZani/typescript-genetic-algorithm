@@ -12,7 +12,7 @@
  * @param size Size of the ID. The default size is 21.
  * @returns A random string.
  */
-export function nanoid(size?: number): string
+export function nanoid(size?: number): string;
 
 /**
  * Generate secure unique ID with custom alphabet.
@@ -32,8 +32,8 @@ export function nanoid(size?: number): string
  */
 export function customAlphabet(
   alphabet: string,
-  defaultSize?: number
-): (size?: number) => string
+  defaultSize?: number,
+): (size?: number) => string;
 
 /**
  * Generate unique ID with custom random generator and alphabet.
@@ -63,8 +63,8 @@ export function customAlphabet(
 export function customRandom(
   alphabet: string,
   size: number,
-  random: (bytes: number) => Uint8Array
-): () => string
+  random: (bytes: number) => Uint8Array,
+): () => string;
 
 /**
  * URL safe symbols.
@@ -75,7 +75,7 @@ export function customRandom(
  * nanoid() //=> "Uakgb_J5m9"
  * ```
  */
-export const urlAlphabet: string
+export const urlAlphabet: string;
 
 /**
  * Generate an array of random bytes collected from hardware noise.
@@ -88,4 +88,4 @@ export const urlAlphabet: string
  * @param bytes Size of the array.
  * @returns An array of random bytes.
  */
-export function random(bytes: number): Uint8Array
+export function random(bytes: number): Uint8Array;

@@ -1,8 +1,10 @@
 export default async (weights: number[]) => {
+  const maxVal = 1000000;
   const weightsString = JSON.stringify(weights);
   const p = Deno.run({
     cmd: ["npm", "run", "get-fitness", weightsString],
     stdout: "piped",
+    //stderr:"null"
   });
   const { code } = await p.status();
   if (code === 0) {
@@ -11,10 +13,10 @@ export default async (weights: number[]) => {
     const result = regex.exec(rawOutput);
     if (result != null) {
       const { fitness } = JSON.parse(result[1]);
-      return fitness;
+      return -fitness;
     }
   } else {
     /* error */
   }
-  return -1;
+  return Infinity;
 };

@@ -1,16 +1,13 @@
 {
-  "mutationRate": 0.02,
-  "mutationImpact": 0.1,
+  "mutationRate": 0.2,
+  "mutationImpact": 0.2,
   "survivalThreshold": 0.1,
-  "generationCount": 1,
-  "populationSize": 3,
-  "threadCount": 3,
-  "validGenomeRanges": [
-    [-1, 1],
-    [-1, 1]
-  ],
+  "generationCount": 20,
+  "populationSize": 50,
+  "threadCount": 14,
+  "validGenomeRanges": { "length": 377, "min": -1, "max": 1 },
   "objectiveFunctionName": "nn",
   "objectiveFunctionLocation": "../obj_functions",
-  "savePath": "../plot/data/",
-  "repeat": 10
+  "savePath": "../../src/weights.json",
+  "repeat": 1
 }

@@ -10,7 +10,7 @@
  * @param size Size of the ID. The default size is 21.
  * @returns A random string.
  */
-export function nanoid(size?: number): string
+export function nanoid(size?: number): string;
 
 /**
  * Generate a unique ID based on a custom alphabet.
@@ -29,5 +29,5 @@ export function nanoid(size?: number): string
  */
 export function customAlphabet(
   alphabet: string,
-  defaultSize?: number
-): (size?: number) => string
+  defaultSize?: number,
+): (size?: number) => string;

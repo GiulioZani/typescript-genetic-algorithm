@@ -1,10 +1,15 @@
 # An parallel GA optimizer for TypeScript
 
-This allows you to optimize any function exported by a TypeScript module via a genetic/evolutionary algorithm.
-For additional info email: giulio(at)zani.gmail.com
+This allows you to optimize any function exported by a TypeScript module via a
+genetic/evolutionary algorithm. For additional info email:
+giulio(at)zani.gmail.com
 
-Run by installing [deno](https://deno.land/) and then:
+## Run
 
+Install [deno](https://deno.land/)
 ```
-deno run --allow-read --allow-write main.ts
+cd GA
+```
+```
+deno run --allow-read --allow-write --unstable --allow-run main.ts
 ```

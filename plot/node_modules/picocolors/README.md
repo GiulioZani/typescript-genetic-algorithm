@@ -1,13 +1,14 @@
 # picocolors
 
-The tiniest and the fastest library for terminal output formatting with ANSI colors.
+The tiniest and the fastest library for terminal output formatting with ANSI
+colors.
 
 ```javascript
-import pc from "picocolors"
+import pc from "picocolors";
 
 console.log(
-  pc.green(`How are ${pc.italic(`you`)} doing?`)
-)
+  pc.green(`How are ${pc.italic(`you`)} doing?`),
+);
 ```
 
 - **No dependencies.**
@@ -18,4 +19,6 @@ console.log(
 - [`NO_COLOR`](https://no-color.org/) friendly.
 
 ## Docs
-Read **[full docs](https://github.com/alexeyraspopov/picocolors#readme)** on GitHub.
+
+Read **[full docs](https://github.com/alexeyraspopov/picocolors#readme)** on
+GitHub.

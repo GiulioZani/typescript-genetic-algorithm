@@ -14,7 +14,7 @@
  * @param size Size of the ID. The default size is 21.
  * @returns A promise with a random string.
  */
-export function nanoid(size?: number): Promise<string>
+export function nanoid(size?: number): Promise<string>;
 
 /**
  * A low-level function.
@@ -37,8 +37,8 @@ export function nanoid(size?: number): Promise<string>
  */
 export function customAlphabet(
   alphabet: string,
-  defaultSize?: number
-): (size?: number) => Promise<string>
+  defaultSize?: number,
+): (size?: number) => Promise<string>;
 
 /**
  * Generate an array of random bytes collected from hardware noise.
@@ -53,4 +53,4 @@ export function customAlphabet(
  * @param bytes Size of the array.
  * @returns A promise with a random bytes array.
  */
-export function random(bytes: number): Promise<Uint8Array>
+export function random(bytes: number): Promise<Uint8Array>;

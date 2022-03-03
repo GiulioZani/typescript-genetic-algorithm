@@ -16,7 +16,6 @@ addEventListener("message", async (event) => {
     if (getFitness !== null) {
       const [genome, index] = parsedEvent as [Genome, number];
       const fitness = await getFitness(genome);
-      console.log(genome);
       postMessage([fitness, index]);
     } else {
       throw "Must initialize objective function first!";
