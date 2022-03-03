@@ -7,9 +7,11 @@ giulio(at)zani.gmail.com
 ## Run
 
 Install [deno](https://deno.land/)
+
 ```
 cd GA
 ```
+
 ```
 deno run --allow-read --allow-write --unstable --allow-run main.ts
 ```

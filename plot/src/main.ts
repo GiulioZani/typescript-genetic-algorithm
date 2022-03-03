@@ -11,7 +11,7 @@ for (const [alg, color] of algorithmsWithColor) {
 window.plot = async () => {
   globalIsDone = false;
   const algorithms = algorithmsWithColor.filter(
-    (a) => (document.getElementById(a[0])! as HTMLInputElement).checked
+    (a) => (document.getElementById(a[0])! as HTMLInputElement).checked,
   );
   if (algorithms.length > 0) {
     const indexDiv = document.getElementById("iteration")! as HTMLInputElement;
@@ -28,7 +28,7 @@ window.plot = async () => {
         ]),
         "plot1",
         objectiveFunctionName,
-        "surface"
+        "surface",
       ),
       await getPlotter(
         algorithms.map((a) => [
@@ -37,7 +37,7 @@ window.plot = async () => {
         ]),
         "plot2",
         objectiveFunctionName,
-        "contour"
+        "contour",
       ),
     ];
     let i = 0;
