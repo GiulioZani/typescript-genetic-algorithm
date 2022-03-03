@@ -1,3 +1,5 @@
+import ProgressBar from "https://deno.land/x/progress@v1.1.4/mod.ts";
+
 type Genome = number[];
 const getArgMax = (values: number[]) => {
   let max = values[0];
@@ -28,7 +30,7 @@ const random = (a: number, b: number): number => Math.random() * (b - a) + a;
 
 const randomGenomes = (
   count: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ): Genome[] => {
   return Array(count)
     .fill(0)
@@ -41,7 +43,7 @@ const clip = (val: number, min: number, max: number) =>
 const getMutation = (
   value: number,
   range: [number, number],
-  mutationImpact: number
+  mutationImpact: number,
 ) =>
   clip(
     value +
@@ -50,13 +52,13 @@ const getMutation = (
         (range[1] - range[0]) *
         (Math.random() > 0.5 ? -1 : 1),
     range[0],
-    range[1]
+    range[1],
   );
 const mutate = (
   genome: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ): Genome => {
   const doMutate = Math.random() <= mutationRate;
   const mutated = genome.map((x, i) =>
@@ -67,7 +69,7 @@ const mutate = (
 const selectBest = (
   genomes: Genome[],
   fitnesses: number[],
-  survivalThreshold = 0.3
+  survivalThreshold = 0.3,
 ): Genome[] => {
   //const sortedGenomes = argSort(genomes, fitnesses);
   const sortedGenomesWithFitnesses = genomes
@@ -84,13 +86,13 @@ const mate = (
   g2: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ): Genome => {
   return mutate(
     g1.map((_, i) => (g1[i] + g2[i]) / 2) as Genome,
     mutationRate,
     mutationImpact,
-    validGenomeRanges
+    validGenomeRanges,
   );
 };
 const getChildren = (
@@ -98,7 +100,7 @@ const getChildren = (
   mutationRate: number,
   mutationImpact: number,
   validGenomeRanges: [number, number][],
-  count = 0
+  count = 0,
 ): Genome[] => {
   if (count === 0) {
     count = genomes.length;
@@ -113,8 +115,8 @@ const getChildren = (
           genomes[j],
           mutationRate,
           mutationImpact,
-          validGenomeRanges
-        )
+          validGenomeRanges,
+        ),
       );
     }
   }
@@ -122,9 +124,19 @@ const getChildren = (
 };
 const getFitnesses = (
   threads: Worker[],
-  population: Genome[]
+  population: Genome[],
 ): Promise<number[]> =>
   new Promise<number[]>((resolve, _reject) => {
+    const progressSent = new ProgressBar({
+      total: population.length,
+      display: "SENT :completed/:total :time [:bar] :percent",
+    });
+
+    const progressCompleted = new ProgressBar({
+      total: population.length,
+      display: "COMPLETED :completed/:total :time [:bar] :percent",
+    });
+
     const fitnesses = new Array<number>();
     let completed = 0;
     let sent = 0;
@@ -139,10 +151,12 @@ const getFitnesses = (
         )["data"];
         fitnesses[index] = fitness;
         completed += 1;
+        progressCompleted.render(completed);
         if (sent < population.length) {
           const genome2 = population[sent];
           thread.postMessage([genome2, sent]);
           sent += 1;
+          progressSent.render(sent);
         } else if (completed === population.length) {
           resolve(fitnesses);
         }

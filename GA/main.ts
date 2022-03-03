@@ -19,7 +19,7 @@ const evolve = async (
   objectiveFunctionLocation: string,
   objectiveFunctionName: string,
   savePath: string,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ) => {
   let population = randomGenomes(populationSize, validGenomeRanges);
   let fitnesses: number[] = [];
@@ -28,11 +28,11 @@ const evolve = async (
       new Worker(new URL("./get_fitness.ts", import.meta.url).href, {
         type: "module",
         deno: { namespace: true },
-      } as unknown as WorkerOptions)
+      } as unknown as WorkerOptions),
   );
   const objectiveFunctionFileName = path.join(
     objectiveFunctionLocation,
-    `${objectiveFunctionName}.ts`
+    `${objectiveFunctionName}.ts`,
   );
   for (const thread of threads) {
     thread.postMessage(objectiveFunctionFileName);
@@ -49,17 +49,18 @@ const evolve = async (
       mutationRate,
       mutationImpact,
       validGenomeRanges,
-      populationSize - survivors.length
+      populationSize - survivors.length,
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),
-      validGenomeRanges
+      validGenomeRanges,
     );
     const argMin = getArgMin(fitnesses);
     bestSoFar = population[argMin];
     console.log(
-      `End of generation ${generation + 1}
-      Best fitness:${-fitnesses[argMin]}\n`
+      `
+      End of generation ${generation + 1}/${generationCount}
+      Best fitness:${-fitnesses[argMin]}\n`,
     );
     history.push([fitnesses, population]);
     population = [...survivors, ...children, ...novelIndividuals];
@@ -103,14 +104,15 @@ const main = async () => {
     repeat,
     validGenomeRanges,
   } = config;
+  console.log(config);
   const parsedValidGenomeRanges = Array.isArray(validGenomeRanges)
     ? (validGenomeRanges as [number, number][])
     : Array(validGenomeRanges.length)
-        .fill(0)
-        .map(
-          (x) =>
-            [validGenomeRanges.min, validGenomeRanges.max] as [number, number]
-        );
+      .fill(0)
+      .map(
+        (x) =>
+          [validGenomeRanges.min, validGenomeRanges.max] as [number, number],
+      );
   const histories = [];
   for (let i = 0; i < repeat; i++) {
     histories.push(
@@ -124,13 +126,13 @@ const main = async () => {
         objectiveFunctionLocation,
         objectiveFunctionName,
         savePath,
-        parsedValidGenomeRanges
-      )
+        parsedValidGenomeRanges,
+      ),
     );
   }
   await Deno.writeTextFile(
     `histories/${objectiveFunctionName}.json`,
-    JSON.stringify(histories, null, 2)
+    JSON.stringify(histories, null, 2),
   );
   Deno.exit();
 };
