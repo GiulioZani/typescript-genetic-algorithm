@@ -19,7 +19,7 @@ const evolve = async (
   objectiveFunctionLocation: string,
   objectiveFunctionName: string,
   savePath: string,
-  validGenomeRanges: [number, number][],
+  validGenomeRanges: [number, number][]
 ) => {
   let population = randomGenomes(populationSize, validGenomeRanges);
   let fitnesses: number[] = [];
@@ -27,12 +27,12 @@ const evolve = async (
     () =>
       new Worker(new URL("./get_fitness.ts", import.meta.url).href, {
         type: "module",
-        deno: { namespace: true },
-      } as unknown as WorkerOptions),
+        deno: { namespace: true, permissions: { net: true } },
+      } as unknown as WorkerOptions)
   );
   const objectiveFunctionFileName = path.join(
     objectiveFunctionLocation,
-    `${objectiveFunctionName}.ts`,
+    `${objectiveFunctionName}.ts`
   );
   for (const thread of threads) {
     thread.postMessage(objectiveFunctionFileName);
@@ -43,29 +43,29 @@ const evolve = async (
     fitnesses = await getFitnesses(threads, population);
 
     const survivors = selectBest(population, fitnesses, survivalThreshold);
-    const parents = survivors.length > 0 ? survivors : population;
+    const parents = survivors.length > 1 ? survivors : population;
     const children = getChildren(
       parents,
       mutationRate,
       mutationImpact,
       validGenomeRanges,
-      populationSize - survivors.length,
+      populationSize - survivors.length
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),
-      validGenomeRanges,
+      validGenomeRanges
     );
     const argMin = getArgMin(fitnesses);
     bestSoFar = population[argMin];
     console.log(
       `
       End of generation ${generation + 1}/${generationCount}
-      Best fitness:${-fitnesses[argMin]}\n`,
+      Best fitness:${-fitnesses[argMin]}\n`
     );
     history.push([fitnesses, population]);
     population = [...survivors, ...children, ...novelIndividuals];
+    await Deno.writeTextFile(savePath, JSON.stringify(bestSoFar));
   }
-  await Deno.writeTextFile(savePath, JSON.stringify(bestSoFar));
   /*
   await Deno.writeTextFile(
     `histories/${objectiveFunctionName}_${
@@ -108,11 +108,11 @@ const main = async () => {
   const parsedValidGenomeRanges = Array.isArray(validGenomeRanges)
     ? (validGenomeRanges as [number, number][])
     : Array(validGenomeRanges.length)
-      .fill(0)
-      .map(
-        (x) =>
-          [validGenomeRanges.min, validGenomeRanges.max] as [number, number],
-      );
+        .fill(0)
+        .map(
+          (x) =>
+            [validGenomeRanges.min, validGenomeRanges.max] as [number, number]
+        );
   const histories = [];
   for (let i = 0; i < repeat; i++) {
     histories.push(
@@ -126,13 +126,13 @@ const main = async () => {
         objectiveFunctionLocation,
         objectiveFunctionName,
         savePath,
-        parsedValidGenomeRanges,
-      ),
+        parsedValidGenomeRanges
+      )
     );
   }
   await Deno.writeTextFile(
     `histories/${objectiveFunctionName}.json`,
-    JSON.stringify(histories, null, 2),
+    JSON.stringify(histories, null, 2)
   );
   Deno.exit();
 };
