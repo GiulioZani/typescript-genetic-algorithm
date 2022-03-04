@@ -1,6 +1,6 @@
 {
-  "mutationRate": 0.2,
-  "mutationImpact": 0.2,
+  "mutationRate": 0.05,
+  "mutationImpact": 0.5,
   "survivalThreshold": 0.04,
   "generationCount": 100,
   "populationSize": 50,
