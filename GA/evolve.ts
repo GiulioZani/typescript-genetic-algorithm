@@ -1,4 +1,5 @@
 import ProgressBar from "https://deno.land/x/progress@v1.1.4/mod.ts";
+import {BitView} from './bit_view.ts'
 
 type Genome = number[];
 const getArgMax = (values: number[]) => {
@@ -30,7 +31,7 @@ const random = (a: number, b: number): number => Math.random() * (b - a) + a;
 
 const randomGenomes = (
   count: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ): Genome[] => {
   return Array(count)
     .fill(0)
@@ -43,33 +44,49 @@ const clip = (val: number, min: number, max: number) =>
 const getMutation = (
   value: number,
   range: [number, number],
-  mutationImpact: number
-) =>
-  clip(
-    value +
-      Math.random() *
-        mutationImpact *
-        (range[1] - range[0]) *
-        (Math.random() > 0.5 ? -1 : 1),
-    range[0],
-    range[1]
-  );
+  mutationImpact: number,
+  binary = false,
+): number => {
+  let result: (null | number) = null;
+  if (!binary) {
+    result = clip(
+      value +
+        Math.random() *
+          mutationImpact *
+          (range[1] - range[0]) *
+          (Math.random() > 0.5 ? -1 : 1),
+      range[0],
+      range[1],
+    );
+  } else {
+    const p = 1 / 64;
+    let bitValue = new BitView(value, 'float')
+    for (let i = 0; i < 64; i++) {
+      if (Math.random() < p) {
+        bitValue = bitValue.toggle(i)
+      }
+    }
+    result = value;
+  }
+  return result!;
+};
 const mutate = (
   genome: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
+  binary = false,
 ): Genome => {
-  const doMutate = Math.random() <= mutationRate;
+  const doMutate = binary ? true : Math.random() <= mutationRate;
   const mutated = genome.map((x, i) =>
-    doMutate ? getMutation(x, validGenomeRanges[i], mutationImpact) : x
+    doMutate ? getMutation(x, validGenomeRanges[i], mutationImpact, binary) : x
   ) as Genome;
   return mutated;
 };
 const selectBest = (
   genomes: Genome[],
   fitnesses: number[],
-  survivalThreshold = 0.3
+  survivalThreshold = 0.3,
 ): Genome[] => {
   //const sortedGenomes = argSort(genomes, fitnesses);
   const sortedGenomesWithFitnesses = genomes
@@ -81,18 +98,30 @@ const selectBest = (
   return result;
 };
 
+const binaryCrossover = (val1: number, val2: number):number => {
+  const bitVal1 = new BitView(val1)
+  const bitVal2 = new BitView(val2)
+  const crossoverPosition = Math.round(Math.random() * 32);
+  const result = bitVal1.crossover(bitVal2, crossoverPosition)
+  return result.float
+};
+
 const mate = (
   g1: Genome,
   g2: Genome,
   mutationRate: number,
   mutationImpact: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
+  binary = false,
 ): Genome => {
   return mutate(
-    g1.map((_, i) => (g1[i] + g2[i]) / 2) as Genome,
+    g1.map((_, i) =>
+      !binary ? (g1[i] + g2[i]) / 2 : binaryCrossover(g1[i], g2[i])
+    ) as Genome,
     mutationRate,
     mutationImpact,
-    validGenomeRanges
+    validGenomeRanges,
+    binary,
   );
 };
 const getChildren = (
@@ -100,9 +129,10 @@ const getChildren = (
   mutationRate: number,
   mutationImpact: number,
   validGenomeRanges: [number, number][],
-  count = 0
+  binary = false,
+  count = -1,
 ): Genome[] => {
-  if (count === 0) {
+  if (count === -1) {
     count = genomes.length;
   }
   const children = new Array<Genome>();
@@ -115,8 +145,9 @@ const getChildren = (
           genomes[j],
           mutationRate,
           mutationImpact,
-          validGenomeRanges
-        )
+          validGenomeRanges,
+          binary,
+        ),
       );
     }
   }
@@ -124,7 +155,7 @@ const getChildren = (
 };
 const getFitnesses = (
   threads: Worker[],
-  population: Genome[]
+  population: Genome[],
 ): Promise<number[]> =>
   new Promise<number[]>((resolve, _reject) => {
     const progressCompleted = new ProgressBar({

@@ -1,13 +1,14 @@
 {
-  "mutationRate": 0.05,
-  "mutationImpact": 0.5,
+  "mutationRate": 0.01,
+  "mutationImpact": 0.09,
   "survivalThreshold": 0.04,
   "generationCount": 100,
-  "populationSize": 50,
-  "threadCount": 12,
-  "validGenomeRanges": { "length": 407, "min": -1, "max": 1 },
+  "populationSize": 100,
+  "threadCount": 10,
+  "validGenomeRanges": { "length": 1437, "min": -1, "max": 1 },
   "objectiveFunctionName": "nn",
   "objectiveFunctionLocation": "../obj_functions",
   "savePath": "../../src/weights.json",
-  "repeat": 1
+  "repeat": 1,
+  "binary": true
 }

@@ -26,7 +26,7 @@ const getMaxPositionY = (data: Data) =>
 const rastrigin = (x: [number, number]) =>
   x.reduce(
     (acc, val) => acc + Math.pow(val, 2) - 10 * Math.cos(2 * Math.PI * val),
-    0,
+    0
   ) + 20;
 const rosenbrock = (x: [number, number]) => {
   const a = 1;
@@ -45,7 +45,7 @@ const dataToTrace = (
   dati: Datum[],
   type: string,
   objectiveFunction: (a: [number, number]) => number,
-  color: string,
+  color: string
 ) => {
   const result = {
     x: dati.map((p) => p.position[0]), //dati.map((p) => pixDensity * normalizeY(p.position[1])),
@@ -73,7 +73,7 @@ const getPlotter = async (
   fileNamesWithColors: [string, string][],
   divName: string,
   objectiveFunctionName: string,
-  type = "contour",
+  type = "contour"
   //objectiveFunction:(c:[a:number, b:number])=>number
 ): Promise<Plotter> => {
   const objectiveFunction = objectiveFunctions[objectiveFunctionName];
@@ -139,8 +139,8 @@ const getPlotter = async (
         allData[i][0],
         type,
         objectiveFunction,
-        fileNamesWithColors[i][1],
-      ),
+        fileNamesWithColors[i][1]
+      )
     );
   }
 
@@ -151,15 +151,16 @@ const getPlotter = async (
     showlegend: false,
     scene: {
       camera: {
-        eye: objectiveFunctionName === "rastrigin"
-          ? { x: 0.8, y: -0.8, z: 1.5 }
-          : {},
+        eye:
+          objectiveFunctionName === "rastrigin"
+            ? { x: 0.8, y: -0.8, z: 1.5 }
+            : {},
       },
     },
   });
   const getValues = (i: number, dati: Datum[]) =>
     dati.map(
-      (p) => p.position[i], //pixDensity * normalizeY(p.position[i]),
+      (p) => p.position[i] //pixDensity * normalizeY(p.position[i]),
     );
 
   let i = 0;
@@ -174,7 +175,7 @@ const getPlotter = async (
           trace.y = getValues(1, data[i]);
           if (type === "surface") {
             trace["z"] = data[i].map(
-              (p) => objectiveFunction([p.position[1], p.position[0]]) + 0.01,
+              (p) => objectiveFunction([p.position[1], p.position[0]]) + 0.01
             );
           }
         }
