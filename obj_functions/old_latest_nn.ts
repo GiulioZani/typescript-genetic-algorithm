@@ -1,3 +1,3 @@
-import { getAvgFitness } from "../../dist/get_fitness.js";
+import { getAvgFitness } from "../../src/get_fitness.ts";
 
-export default (nn: number[]) => -getAvgFitness(nn);
+export default (nn: number[]) => -getAvgFitness(nn as unknown as null);

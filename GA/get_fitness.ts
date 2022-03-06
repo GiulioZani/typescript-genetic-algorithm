@@ -9,8 +9,8 @@ addEventListener("message", async (event) => {
   if (typeof parsedEvent === "string") {
     try {
       getFitness = (await import(parsedEvent)).default;
-    } catch {
-      throw `Module ${parsedEvent} doesn't exist!`;
+    } catch (e) {
+      throw `Error loading module: ${e}`;
     }
   } else {
     if (getFitness !== null) {
