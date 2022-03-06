@@ -94,7 +94,8 @@ const evolve = async ({
     );
     history.push(fitnesses);
     population = [...survivors, ...children, ...novelIndividuals];
-    const currentSavePath = savePath.at(-1)! !== '/' ? savePath : path.join(savePath, `${generation}_${bestFitness}.json`)
+    const currentSavePath = savePath.at(-1)! !== '/' ? savePath : path.join(savePath, `${generation}_${Math.round(bestFitness)}.json`)
+    console.log(`Saving to ${currentSavePath}`)
     await Deno.writeTextFile(currentSavePath, JSON.stringify(bestSoFar));
   }
   /*

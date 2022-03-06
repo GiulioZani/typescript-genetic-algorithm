@@ -59,9 +59,9 @@ const getMutation = ( // mutate a single number
       range[1]
     );
   } else {
-    const p = 1 / 64;
+    const p = 1 / 32;
     let bitValue = new BitView(value, "float");
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < 32; i++) {
       if (Math.random() < p) {
         bitValue = bitValue.toggle(i);
       }
