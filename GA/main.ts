@@ -9,6 +9,7 @@ import {
 } from "./evolve.ts";
 import config from "./config.json" assert { type: "json" };
 
+// initializes  the workers
 const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{
   const threads = new Array(threadCount).fill(0).map(
     () =>
@@ -26,6 +27,7 @@ const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{
   return threads
 }
 
+// initializes and evolves the genomes
 const evolve = async ({
   mutationRate,
   mutationImpact,

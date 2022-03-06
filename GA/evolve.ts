@@ -96,13 +96,13 @@ const selectBest = ( // select best in the population
   const result = sortedGenomes.slice(0, topIndex);
   return result;
 };
-
-const binaryCrossover = (val1: number, val2: number): number => {
+// performs binary crossover
+const binaryCrossover = (val1: number, val2: number): number=> {
   const bitVal1 = new BitView(val1);
   const bitVal2 = new BitView(val2);
   const crossoverPosition = Math.round(Math.random() * 32);
-  const result = bitVal1.crossover(bitVal2, crossoverPosition);
-  return result.float;
+  const gene1 = bitVal1.crossover(bitVal2, crossoverPosition);
+  return gene1.float
 };
 
 const mate = ( // mate two genomes (crossover + mutation)
@@ -112,16 +112,17 @@ const mate = ( // mate two genomes (crossover + mutation)
   mutationImpact: number,
   validGenomeRanges: [number, number][],
   binary = false
-): Genome => {
-  return mutate(
-    g1.map((_, i) =>
-      !binary ? (g1[i] + g2[i]) / 2 : binaryCrossover(g1[i], g2[i])
-    ) as Genome,
+): Genome[] => {
+  const children : Genome[]= !binary ? 
+    [g1.map((_, i) =>(g1[i] + g2[i]) / 2)] :
+    [g1.map((_, i) =>binaryCrossover(g1[i], g2[i])), g1.map((_, i) =>binaryCrossover(g2[i], g1[i]))]
+  return children.map((g:Genome)=>mutate(
+    g,
     mutationRate,
     mutationImpact,
     validGenomeRanges,
     binary
-  );
+  ))
 };
 const getChildren = ( // creates couples and get their children
   genomes: Genome[],
@@ -139,7 +140,7 @@ const getChildren = ( // creates couples and get their children
     for (let i = genomes.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       children.push(
-        mate(
+        ...mate(
           genomes[i],
           genomes[j],
           mutationRate,
@@ -168,9 +169,9 @@ const getFitnesses = ( // evaluate a population
     for (let i = 0; i < threads.length; i++) {
       const thread = threads[i];
       const genome1 = population[sent];
-      thread.postMessage([genome1, sent]);
+      thread.postMessage([genome1, sent]); // send genome to thread for evaluation
       sent += 1;
-      thread.onmessage = (e) => {
+      thread.onmessage = (e) => { // collect the fitness
         const [fitness, index] = (
           e as unknown as Record<string, [number, number]>
         )["data"];
@@ -182,7 +183,7 @@ const getFitnesses = ( // evaluate a population
           thread.postMessage([genome2, sent]);
           sent += 1;
         } else if (completed === population.length) {
-          resolve(fitnesses);
+          resolve(fitnesses); // send back all fitnesses
         }
       };
     }
