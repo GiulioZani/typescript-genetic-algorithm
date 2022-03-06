@@ -7,9 +7,9 @@ import {
   randomGenomes,
   selectBest,
 } from "./evolve.ts";
-import config from "./config.json" assert { type: "json" }; // read config file
+import config from "./config.json" assert { type: "json" };
 
-const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{ // create n threads to evaluate fitnesses
+const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{
   const threads = new Array(threadCount).fill(0).map(
     () =>
       new Worker(new URL("./get_fitness.ts", import.meta.url).href, {
@@ -26,7 +26,7 @@ const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{ 
   return threads
 }
 
-const evolve = async ({ // get fittest genomes given parameters
+const evolve = async ({
   mutationRate,
   mutationImpact,
   survivalThreshold,
@@ -60,7 +60,7 @@ const evolve = async ({ // get fittest genomes given parameters
   let threads = getWorkers(threadCount, objectiveFunctionFileName);
   const history: number[][] = [];
   let bestSoFar: Genome | null = null;
-  for (let generation = 1; generation < generationCount + 1; generation++) { // loop over generations
+  for (let generation = 1; generation < generationCount + 1; generation++) {
     if (generation % 5 === 0 && generation > 1 ) {
       console.log("Restarting all threads");
       for (const thread of threads){
@@ -86,14 +86,16 @@ const evolve = async ({ // get fittest genomes given parameters
     );
     const argMin = getArgMin(fitnesses);
     bestSoFar = population[argMin];
+    const bestFitness = -fitnesses[argMin]
     console.log(
       `
-      End of generation ${generation + 1}/${generationCount}
-      Best fitness:${-fitnesses[argMin]}\n`
+      End of generation ${generation}/${generationCount}
+      Best fitness:${bestFitness}\n`
     );
     history.push(fitnesses);
     population = [...survivors, ...children, ...novelIndividuals];
-    await Deno.writeTextFile(savePath, JSON.stringify(bestSoFar)); // save the best genome
+    const currentSavePath = savePath.at(-1)! !== '/' ? savePath : path.join(savePath, `${generation}_${bestFitness}.json`)
+    await Deno.writeTextFile(currentSavePath, JSON.stringify(bestSoFar));
   }
   /*
   await Deno.writeTextFile(
@@ -133,8 +135,8 @@ const main = async () => {
     repeat,
     validGenomeRanges,
     binary,
-  } = config; // read configuration object
-  console.log(config); 
+  } = config;
+  console.log(config);
   const parsedValidGenomeRanges = Array.isArray(validGenomeRanges)
     ? (validGenomeRanges as [number, number][])
     : Array(validGenomeRanges.length)
@@ -144,7 +146,7 @@ const main = async () => {
             [validGenomeRanges.min, validGenomeRanges.max] as [number, number]
         );
   const histories = [];
-  for (let i = 0; i < repeat; i++) { // repeat k times, to see how different trainings change due to random initializations
+  for (let i = 0; i < repeat; i++) {
     histories.push(
       await evolve({
         mutationRate,
@@ -161,7 +163,7 @@ const main = async () => {
       })
     );
   }
-  await Deno.writeTextFile( // save the history
+  await Deno.writeTextFile(
     `histories/${objectiveFunctionName}.json`,
     JSON.stringify(histories, null, 2)
   );
