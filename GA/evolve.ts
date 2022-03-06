@@ -29,7 +29,7 @@ const getArgMin = (values: number[]) => {
 
 const random = (a: number, b: number): number => Math.random() * (b - a) + a;
 
-const randomGenomes = (
+const randomGenomes = ( // generate brand new random genomes
   count: number,
   validGenomeRanges: [number, number][]
 ): Genome[] => {
@@ -41,7 +41,7 @@ const randomGenomes = (
 const clip = (val: number, min: number, max: number) =>
   Math.min(max, Math.max(min, val));
 
-const getMutation = (
+const getMutation = ( // mutate a single number
   value: number,
   range: [number, number],
   mutationImpact: number,
@@ -70,7 +70,7 @@ const getMutation = (
   }
   return result!;
 };
-const mutate = (
+const mutate = ( // mutate a genome
   genome: Genome,
   mutationRate: number,
   mutationImpact: number,
@@ -83,12 +83,11 @@ const mutate = (
   ) as Genome;
   return mutated;
 };
-const selectBest = (
+const selectBest = ( // select best in the population
   genomes: Genome[],
   fitnesses: number[],
   survivalThreshold = 0.3
 ): Genome[] => {
-  //const sortedGenomes = argSort(genomes, fitnesses);
   const sortedGenomesWithFitnesses = genomes
     .map((g, i) => [g, fitnesses[i]] as [Genome, number])
     .sort((a, b) => a[1] - b[1]);
@@ -106,7 +105,7 @@ const binaryCrossover = (val1: number, val2: number): number => {
   return result.float;
 };
 
-const mate = (
+const mate = ( // mate two genomes (crossover + mutation)
   g1: Genome,
   g2: Genome,
   mutationRate: number,
@@ -124,7 +123,7 @@ const mate = (
     binary
   );
 };
-const getChildren = (
+const getChildren = ( // creates couples and get their children
   genomes: Genome[],
   mutationRate: number,
   mutationImpact: number,
@@ -153,7 +152,7 @@ const getChildren = (
   }
   return children.slice(0, count);
 };
-const getFitnesses = (
+const getFitnesses = ( // evaluate a population
   threads: Worker[],
   population: Genome[]
 ): Promise<number[]> =>
