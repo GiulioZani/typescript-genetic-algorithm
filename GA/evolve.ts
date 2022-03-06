@@ -66,7 +66,7 @@ const getMutation = (
         bitValue = bitValue.toggle(i);
       }
     }
-    result = 10*Math.tanh(bitValue.float);
+    result = Math.tanh(bitValue.float);
   }
   return result!;
 };
