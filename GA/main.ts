@@ -80,7 +80,7 @@ const evolve = async ({
       mutationImpact,
       validGenomeRanges,
       binary,
-      populationSize - survivors.length
+      /*populationSize - */survivors.length
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),
@@ -99,6 +99,7 @@ const evolve = async ({
     const currentSavePath = savePath.at(-1)! !== '/' ? savePath : path.join(savePath, `${generation}_${Math.round(bestFitness)}.json`)
     console.log(`Saving to ${currentSavePath}`)
     await Deno.writeTextFile(currentSavePath, JSON.stringify(bestSoFar));
+    await Deno.writeTextFile('history.json', JSON.stringify(history));
   }
   /*
   await Deno.writeTextFile(
