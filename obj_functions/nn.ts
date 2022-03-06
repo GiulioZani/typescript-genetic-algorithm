@@ -5,14 +5,13 @@ const getProcess = (weightsString:string) => Deno.run({
   });
 
 
-export default async (weights: number[], maxWait = 20000) => {
+export default async (weights: number[], maxWait = 40000) => {
   const weightsString = JSON.stringify(weights);
-  const maxTime = 30000
   let code: number | null = null;
   let p = getProcess(weightsString)
   let startTime = performance.now()
   const checkElapsedTime = () => {
-    if (performance.now() - startTime > maxTime){
+    if (performance.now() - startTime > maxWait){
       console.log('Restarting subprocess')
       p = getProcess(weightsString)
       startTime = performance.now()
