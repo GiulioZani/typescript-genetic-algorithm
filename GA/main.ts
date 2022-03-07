@@ -140,14 +140,14 @@ const main = async () => {
     validGenomeRanges,
     binary,
   } = config;
-  console.log(config);
+  const longValidGenomeRanges = validGenomeRanges as unknown as {length:number, max:number, min:number}
   const parsedValidGenomeRanges = Array.isArray(validGenomeRanges)
     ? (validGenomeRanges as [number, number][])
-    : Array(validGenomeRanges.length)
+    : Array(longValidGenomeRanges.length)
         .fill(0)
         .map(
           (_) =>
-            [validGenomeRanges.min, validGenomeRanges.max] as [number, number]
+            [longValidGenomeRanges.min, longValidGenomeRanges.max] as [number, number]
         );
   const histories = [];
   for (let i = 0; i < repeat; i++) {
