@@ -31,7 +31,7 @@ const random = (a: number, b: number): number => Math.random() * (b - a) + a;
 
 const randomGenomes = ( // generate brand new random genomes
   count: number,
-  validGenomeRanges: [number, number][]
+  validGenomeRanges: [number, number][],
 ): Genome[] => {
   return Array(count)
     .fill(0)
@@ -45,7 +45,7 @@ const getMutation = ( // mutate a single number
   value: number,
   range: [number, number],
   mutationImpact: number,
-  binary = false
+  binary = false,
 ): number => {
   let result: null | number = null;
   if (!binary) {
@@ -56,10 +56,10 @@ const getMutation = ( // mutate a single number
           (range[1] - range[0]) *
           (Math.random() > 0.5 ? -1 : 1),
       range[0],
-      range[1]
+      range[1],
     );
   } else {
-    const p = 1/64 //1 / 32;
+    const p = 1 / 64; //1 / 32;
     let bitValue = new BitView(value, "float");
     for (let i = 0; i < 32; i++) {
       if (Math.random() < p) {
@@ -75,7 +75,7 @@ const mutate = ( // mutate a genome
   mutationRate: number,
   mutationImpact: number,
   validGenomeRanges: [number, number][],
-  binary = false
+  binary = false,
 ): Genome => {
   const doMutate = binary ? true : Math.random() <= mutationRate;
   const mutated = genome.map((x, i) =>
@@ -83,26 +83,69 @@ const mutate = ( // mutate a genome
   ) as Genome;
   return mutated;
 };
+const inverse = (f: [Genome, number][], x: number): [Genome, number] => {
+  let diff = Infinity;
+  for (let i = 0; i < f.length; i++) {
+    const val = f[i][1];
+    const curDiff = Math.abs(x - val);
+    if (curDiff < diff) {
+      diff = curDiff;
+    } else {
+      return f[i - 1];
+    }
+  }
+  return f.at(-1)!;
+};
+const rouletteSelection = (
+  sortedGenomesWithFitnesses: [Genome, number][],
+  count: number,
+) => {
+  const fitnessSum = sortedGenomesWithFitnesses.reduce(
+    (acc, x) => acc + x[1],
+    0,
+  );
+  const sortedGenomesWithProb = sortedGenomesWithFitnesses.map((x) =>
+    [x[0], x[1] / fitnessSum] as [Genome, number]
+  );
+  const sortedGenomesWithCumulativeProb = sortedGenomesWithProb.slice(1).reduce(
+    (acc, x) => acc.concat([[x[0], Math.min(acc.at(-1)![1] + x[1], 1)]]),
+    [sortedGenomesWithProb[0]],
+  ) as [Genome, number][];
+  //const sum = sortedGenomesWithProb.reduce((acc, x) => x[1] + acc, 0);
+  //const sortedGenomesWithCumulativeProbNormalized =
+  //  sortedGenomesWithCumulativeProb.map((x) =>
+  //    [x[0], x[1] / sum] as [Genome, number]
+  //  );
+  return new Array(count).fill(0).map(() => {
+    const rnd = Math.random();
+    const result = inverse(sortedGenomesWithCumulativeProb, rnd);
+    return result;
+  });
+};
 const selectBest = ( // select best in the population
   genomes: Genome[],
   fitnesses: number[],
-  survivalThreshold = 0.3
+  survivalThreshold = 0.3,
 ): Genome[] => {
   const sortedGenomesWithFitnesses = genomes
     .map((g, i) => [g, fitnesses[i]] as [Genome, number])
     .sort((a, b) => a[1] - b[1]);
-  const sortedGenomes = sortedGenomesWithFitnesses.map((x) => x[0]);
-  const topIndex = Math.round(survivalThreshold * genomes.length);
-  const result = sortedGenomes.slice(0, topIndex);
-  return result;
+  const max = sortedGenomesWithFitnesses.reduce((acc,x)=> x[1] > acc && x[1] < Infinity ? x[1] : acc, -Infinity)*2
+  const fixedGenomesWithFitnesses = sortedGenomesWithFitnesses.map(x => [x[0], Math.min(x[1], max)] as [Genome, number])
+  //const sortedGenomes = sortedGenomesWithFitnesses.map((x) => x[0]);
+  //const topIndex = Math.round(survivalThreshold * genomes.length);
+  //const result = sortedGenomes.slice(0, topIndex);
+  //return result;
+  const result = rouletteSelection(fixedGenomesWithFitnesses, Math.round(survivalThreshold*genomes.length))
+  return result.map(x=>x[0])
 };
 // performs binary crossover
-const binaryCrossover = (val1: number, val2: number): number=> {
+const binaryCrossover = (val1: number, val2: number): number => {
   const bitVal1 = new BitView(val1);
   const bitVal2 = new BitView(val2);
   const crossoverPosition = Math.round(Math.random() * 32);
   const gene1 = bitVal1.crossover(bitVal2, crossoverPosition);
-  return gene1.float
+  return gene1.float;
 };
 
 const mate = ( // mate two genomes (crossover + mutation)
@@ -111,18 +154,23 @@ const mate = ( // mate two genomes (crossover + mutation)
   mutationRate: number,
   mutationImpact: number,
   validGenomeRanges: [number, number][],
-  binary = false
+  binary = false,
 ): Genome[] => {
-  const children : Genome[]= !binary ? 
-    [g1.map((_, i) =>(g1[i] + g2[i]) / 2)] :
-    [g1.map((_, i) =>binaryCrossover(g1[i], g2[i])), g1.map((_, i) =>binaryCrossover(g2[i], g1[i]))]
-  return children.map((g:Genome)=>mutate(
-    g,
-    mutationRate,
-    mutationImpact,
-    validGenomeRanges,
-    binary
-  ))
+  const children: Genome[] = !binary
+    ? [g1.map((_, i) => (g1[i] + g2[i]) / 2)]
+    : [
+      g1.map((_, i) => binaryCrossover(g1[i], g2[i])),
+      g1.map((_, i) => binaryCrossover(g2[i], g1[i])),
+    ];
+  return children.map((g: Genome) =>
+    mutate(
+      g,
+      mutationRate,
+      mutationImpact,
+      validGenomeRanges,
+      binary,
+    )
+  );
 };
 const getChildren = ( // creates couples and get their children
   genomes: Genome[],
@@ -130,7 +178,7 @@ const getChildren = ( // creates couples and get their children
   mutationImpact: number,
   validGenomeRanges: [number, number][],
   binary = false,
-  count = -1
+  count = -1,
 ): Genome[] => {
   if (count === -1) {
     count = genomes.length;
@@ -146,8 +194,8 @@ const getChildren = ( // creates couples and get their children
           mutationRate,
           mutationImpact,
           validGenomeRanges,
-          binary
-        )
+          binary,
+        ),
       );
     }
   }
@@ -155,7 +203,7 @@ const getChildren = ( // creates couples and get their children
 };
 const getFitnesses = ( // evaluate a population
   threads: Worker[],
-  population: Genome[]
+  population: Genome[],
 ): Promise<number[]> =>
   new Promise<number[]>((resolve, _reject) => {
     const progressCompleted = new ProgressBar({
@@ -188,7 +236,6 @@ const getFitnesses = ( // evaluate a population
       };
     }
   });
-
 export type { Genome };
 export {
   getArgMax,
