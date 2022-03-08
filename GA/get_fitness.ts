@@ -1,8 +1,8 @@
 import { Genome } from "./evolve.ts";
 
 let getFitness:
-  | ((a: Genome) => number)
-  | ((a: Genome) => Promise<number>)
+  | ((a: Genome, b:number) => number)
+  | ((a: Genome, b:number) => Promise<number>)
   | null = null;
 addEventListener("message", async (event) => { // acts as an abstraction layer between the (arbitrary) evaluation function and details about thread exectution in javascript
   const parsedEvent = (event as unknown as Record<string, unknown>)["data"];
@@ -14,8 +14,8 @@ addEventListener("message", async (event) => { // acts as an abstraction layer b
     }
   } else {
     if (getFitness !== null) {
-      const [genome, index] = parsedEvent as [Genome, number];
-      const fitness = await getFitness(genome);
+      const [genome, index, generation] = parsedEvent as [Genome, number, number];
+      const fitness = await getFitness(genome, generation);
       postMessage([fitness, index]);
     } else {
       throw "Must initialize objective function first!";

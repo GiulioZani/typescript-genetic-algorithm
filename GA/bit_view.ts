@@ -2,7 +2,7 @@
 /*
   * Uitility class to do bitwise operations on float numbers in JS
   */
-export class BitView { 
+export class BitView {
   intView: Uint32Array;
   floatView: Float32Array;
   constructor(num: number = 0, type: "float" | "int" = "float") {

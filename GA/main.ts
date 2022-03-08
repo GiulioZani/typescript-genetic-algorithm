@@ -10,7 +10,7 @@ import {
 import config from "./config.json" assert { type: "json" };
 
 // initializes  the workers
-const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{
+const getWorkers = (threadCount: number, objectiveFunctionFileName: string) => {
   const threads = new Array(threadCount).fill(0).map(
     () =>
       new Worker(new URL("./get_fitness.ts", import.meta.url).href, {
@@ -19,13 +19,13 @@ const getWorkers = (threadCount: number, objectiveFunctionFileName: string) =>{
           namespace: true,
           permissions: { net: true, read: true, write: true },
         },
-      } as unknown as WorkerOptions)
+      } as unknown as WorkerOptions),
   );
   for (const thread of threads) {
     thread.postMessage(objectiveFunctionFileName);
   }
-  return threads
-}
+  return threads;
+};
 
 // initializes and evolves the genomes
 const evolve = async ({
@@ -57,20 +57,20 @@ const evolve = async ({
   let fitnesses: number[] = [];
   const objectiveFunctionFileName = path.join(
     objectiveFunctionLocation,
-    `${objectiveFunctionName}.ts`
+    `${objectiveFunctionName}.ts`,
   );
   let threads = getWorkers(threadCount, objectiveFunctionFileName);
   const history: number[][] = [];
   let bestSoFar: Genome | null = null;
   for (let generation = 1; generation < generationCount + 1; generation++) {
-    if (generation % 5 === 0 && generation > 1 ) {
+    if (generation % 5 === 0 && generation > 1) {
       console.log("Restarting all threads");
-      for (const thread of threads){
-        thread.terminate()
+      for (const thread of threads) {
+        thread.terminate();
       }
       threads = getWorkers(threadCount, objectiveFunctionFileName);
     }
-    fitnesses = await getFitnesses(threads, population);
+    fitnesses = await getFitnesses(threads, population, generation);
 
     const survivors = selectBest(population, fitnesses, survivalThreshold);
     const parents = survivors.length > 1 ? survivors : population;
@@ -80,26 +80,33 @@ const evolve = async ({
       mutationImpact,
       validGenomeRanges,
       binary,
-      /*populationSize - */survivors.length
+      /*populationSize - */ survivors.length,
     );
     const novelIndividuals = randomGenomes(
       populationSize - (children.length + survivors.length),
-      validGenomeRanges
+      validGenomeRanges,
     );
     const argMin = getArgMin(fitnesses);
     bestSoFar = population[argMin];
-    const bestFitness = -fitnesses[argMin]
+    const bestFitness = -fitnesses[argMin];
     console.log(
       `
       End of generation ${generation}/${generationCount}
-      Best fitness:${bestFitness}\n`
+      Best fitness:${bestFitness}\n`,
     );
     history.push(fitnesses);
     population = [...survivors, ...children, ...novelIndividuals];
-    const currentSavePath = savePath.at(-1)! !== '/' ? savePath : path.join(savePath, `${generation}_${Math.round(bestFitness)}.json`)
-    console.log(`Saving to ${currentSavePath}`)
+    if (savePath.at(-1)! === '/'){
+      const constantSavePath = path.join(savePath, '../weights.json')
+      console.log(`Saving to ${constantSavePath}`);
+      await Deno.writeTextFile(constantSavePath, JSON.stringify(bestSoFar));
+    }
+    const currentSavePath = savePath.at(-1)! !== "/"
+      ? savePath
+      : path.join(savePath, `${generation}_${Math.round(1000*bestFitness)/1000}.json`);
+    console.log(`Saving to ${currentSavePath}`);
     await Deno.writeTextFile(currentSavePath, JSON.stringify(bestSoFar));
-    await Deno.writeTextFile('history.json', JSON.stringify(history));
+    await Deno.writeTextFile("history.json", JSON.stringify(history));
   }
   /*
   await Deno.writeTextFile(
@@ -140,15 +147,23 @@ const main = async () => {
     validGenomeRanges,
     binary,
   } = config;
-  const longValidGenomeRanges = validGenomeRanges as unknown as {length:number, max:number, min:number}
+  console.log(config)
+  const longValidGenomeRanges = validGenomeRanges as unknown as {
+    length: number;
+    max: number;
+    min: number;
+  };
   const parsedValidGenomeRanges = Array.isArray(validGenomeRanges)
     ? (validGenomeRanges as [number, number][])
     : Array(longValidGenomeRanges.length)
-        .fill(0)
-        .map(
-          (_) =>
-            [longValidGenomeRanges.min, longValidGenomeRanges.max] as [number, number]
-        );
+      .fill(0)
+      .map(
+        (_) =>
+          [longValidGenomeRanges.min, longValidGenomeRanges.max] as [
+            number,
+            number,
+          ],
+      );
   const histories = [];
   for (let i = 0; i < repeat; i++) {
     histories.push(
@@ -164,12 +179,12 @@ const main = async () => {
         savePath,
         validGenomeRanges: parsedValidGenomeRanges,
         binary,
-      })
+      }),
     );
   }
   await Deno.writeTextFile(
     `histories/${objectiveFunctionName}.json`,
-    JSON.stringify(histories, null, 2)
+    JSON.stringify(histories, null, 2),
   );
   Deno.exit();
 };

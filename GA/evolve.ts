@@ -204,6 +204,7 @@ const getChildren = ( // creates couples and get their children
 const getFitnesses = ( // evaluate a population
   threads: Worker[],
   population: Genome[],
+  generation: number
 ): Promise<number[]> =>
   new Promise<number[]>((resolve, _reject) => {
     const progressCompleted = new ProgressBar({
@@ -217,7 +218,7 @@ const getFitnesses = ( // evaluate a population
     for (let i = 0; i < threads.length; i++) {
       const thread = threads[i];
       const genome1 = population[sent];
-      thread.postMessage([genome1, sent]); // send genome to thread for evaluation
+      thread.postMessage([genome1, sent, generation]); // send genome to thread for evaluation
       sent += 1;
       thread.onmessage = (e) => { // collect the fitness
         const [fitness, index] = (
@@ -228,7 +229,7 @@ const getFitnesses = ( // evaluate a population
         progressCompleted.render(completed);
         if (sent < population.length) {
           const genome2 = population[sent];
-          thread.postMessage([genome2, sent]);
+          thread.postMessage([genome2, sent,]);
           sent += 1;
         } else if (completed === population.length) {
           resolve(fitnesses); // send back all fitnesses
