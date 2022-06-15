@@ -1,4 +1,4 @@
-# An parallel GA optimizer for TypeScript
+# A parallel GA optimizer for TypeScript
 
 This allows you to optimize any function exported by a TypeScript module via a
 genetic/evolutionary algorithm. For additional info email:
